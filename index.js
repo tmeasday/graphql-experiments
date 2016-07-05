@@ -13,16 +13,36 @@ var userType = new GraphQLObjectType({
   }
 });
 
+var queryRootType = new GraphQLObjectType({
+  name: 'Query',
+  fields: {
+    user: {
+      type: userType,
+      args: {
+        id: { type: GraphQLString }
+      },
+      resolve: function (_, args) {
+        return {
+          id: args.id,
+          name: `foobar ${args.id}`
+        };
+      }
+    }
+  }
+});
+
 var schema = new GraphQLSchema({
-  query: new GraphQLObjectType({
-    name: 'Query',
+  query: queryRootType,
+  mutation: new GraphQLObjectType({
+    name: 'Mutation',
     fields: {
-      user: {
+      updateUser: {
         type: userType,
         args: {
           id: { type: GraphQLString }
         },
         resolve: function (_, args) {
+          console.log(`running updateUser mutation ${args.id}`);
           return {
             id: args.id,
             name: `foobar ${args.id}`
@@ -34,13 +54,21 @@ var schema = new GraphQLSchema({
 });
 
 const documentAST = parse(`
-  {
-    user(id: "1") {
+  mutation Mutation {
+    updateUser(id: "1") {
       id
       name
     }
   }
 `);
 
-execute(schema, documentAST)
+const rootValue = null;
+const context = null;
+const variables = null;
+const operationName = 'mutation';
+
+execute(
+  schema,
+  documentAST)
+  .catch(err => console.log('error', err))
   .then(result => console.log(result));
