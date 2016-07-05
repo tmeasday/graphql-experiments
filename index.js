@@ -50,12 +50,30 @@ var schema = new GraphQLSchema({
         }
       }
     }
+  }),
+  subscription: new GraphQLObjectType({
+    name: 'Subscription',
+    fields: {
+      watchUser: {
+        type: userType,
+        args: {
+          id: { type: GraphQLString }
+        },
+        resolve: function (_, args) {
+          console.log(`running watchUser subscription ${args.id}`);
+          return {
+            id: args.id,
+            name: `foobar ${args.id}`
+          };
+        }
+      }
+    }
   })
 });
 
 const documentAST = parse(`
-  mutation Mutation {
-    updateUser(id: "1") {
+  subscription Subscription {
+    watchUser(id: "1") {
       id
       name
     }
